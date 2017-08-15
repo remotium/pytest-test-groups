@@ -21,6 +21,38 @@ def test_group_runs_appropriate_tests(testdir):
     ])
 
 
+def test_group_with_filtering(testdir):
+    testdir.makepyfile("""
+        def test_a_1(): pass
+        def test_a_2(): pass
+        def test_a_3(): pass
+        def test_a_4(): pass
+        
+        def test_b_1(): pass
+        def test_b_2(): pass
+        def test_b_3(): pass
+        def test_b_4(): pass
+    """)
+
+    tests_run = []
+    for test_group in range(1, 5):
+        result = testdir.inline_run('--test-group-count', '4',
+                                    '--test-group', str(test_group),
+                                    '--test-group-random-seed', '5',
+                                    "-k", "test_a")
+        group_1 = [x.item.name for x in result.calls if x._name == 'pytest_runtest_call']
+        result.assertoutcome(passed=1)
+        tests_run += group_1
+
+    tests_run.sort()
+    assert tests_run == [
+        "test_a_1",
+        "test_a_2",
+        "test_a_3",
+        "test_a_4",
+    ]
+
+
 def test_group_runs_all_test(testdir):
     """Given a large set of tests executed in random order, assert that all
     tests are executed.

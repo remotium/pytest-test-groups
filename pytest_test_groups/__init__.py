@@ -2,6 +2,8 @@ import math
 
 from random import Random
 
+import pytest
+
 
 def get_group_size(total_items, total_groups):
     return int(math.ceil(float(total_items) / total_groups))
@@ -27,7 +29,9 @@ def pytest_addoption(parser):
                     help='Integer to seed pseudo-random test ordering')
 
 
+@pytest.hookimpl(hookwrapper=True)
 def pytest_collection_modifyitems(session, config, items):
+    yield
     group_count = config.getoption('test-group-count')
     group_id = config.getoption('test-group')
     seed = config.getoption('random-seed', False)
